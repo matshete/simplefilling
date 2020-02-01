@@ -132,7 +132,7 @@
 
         if ($_GET["route"] == 'home' || 
             $_GET["route"] == 'users' ||
-            $_GET["route"] == 'customers' ||						$_GET["route"] == 'cipc-annual-returns' ||						$_GET["route"] == 'due' ||						$_GET["route"] == 'emp201' ||						$_GET["route"] == 'emp501' ||						$_GET["route"] == 'irp6' ||						$_GET["route"] == 'vatA' ||						$_GET["route"] == 'vatB' ||						$_GET["route"] == 'vatC' ||						$_GET["route"] == 'it12' ||						$_GET["route"] == 'cidb' ||						$_GET["route"] == 'coida' ||
+            $_GET["route"] == 'customers' ||						$_GET["route"] == 'cipc-annual-returns' ||						$_GET["route"] == 'due' ||						$_GET["route"] == 'emp201' ||						$_GET["route"] == 'emp501' ||						$_GET["route"] == 'irp6' ||						$_GET["route"] == 'vatA' ||						$_GET["route"] == 'vatB' ||						$_GET["route"] == 'vatC' ||						$_GET["route"] == 'it12' ||							$_GET["route"] == 'it14sd' ||						$_GET["route"] == 'cidb' ||						$_GET["route"] == 'coida' ||						$_GET["route"] == 'objemptax201' ||						$_GET["route"] == 'objemptax501' ||							$_GET["route"] == 'objit12' ||						$_GET["route"] == 'objirp6' ||						$_GET["route"] == 'objvat' ||						$_GET["route"] == 'taxclearance' ||
             $_GET["route"] == 'logout'){
 
           include "modules/".$_GET["route"].".php";
@@ -172,7 +172,7 @@
 
 <script src="views/js/template.js"></script>
 <script src="views/js/users.js"></script>
-<script src="views/js/annuals.js"></script><!--<script src="views/js/due.js"></script>--><script src="views/js/emp201.js"></script><script src="views/js/emp501.js"></script><script src="views/js/empirp6.js"></script><script src="views/js/empvatA.js"></script><script src="views/js/empvatB.js"></script><script src="views/js/empvatC.js"></script><script src="views/js/it12.js"></script><script src="views/js/cidb.js"></script><script src="views/js/coida.js"></script>
+<script src="views/js/annuals.js"></script><!--<script src="views/js/due.js"></script>--><script src="views/js/emp201.js"></script><script src="views/js/emp501.js"></script><script src="views/js/empirp6.js"></script><script src="views/js/empvatA.js"></script><script src="views/js/empvatB.js"></script><script src="views/js/empvatC.js"></script><script src="views/js/it12.js"></script><script src="views/js/cidb.js"></script><script src="views/js/coida.js"></script><script src="views/js/objemptax201.js"></script>
 <script src="views/js/customers.js"></script>
 
 

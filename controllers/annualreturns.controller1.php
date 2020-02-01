@@ -256,60 +256,68 @@ class ControllerAnnuals{
 		$body .= "<table class='future col col-lg-12'>";
 
 		$body .= "<tr>";
-		$body .= "<td> <h2>Details of the Current Due Companies For Filling</h2></td>";
+		$body .= "<td> <h2>File Annual Returns</h2></td>";
 		$body .= "</tr>";
 
 		$body .= "<tr>";
 		$body .= "<td>Registration Number </td>";
 		$body .= "<td>Company Name</td>";
 		$body .= "<td>Date</td>";
-		$body .= "<td>status Reminder</td>";
+		$body .= "<td>Number of returns</td>";
 
 		$body .= "</tr>";
-
+		//COMPARE
 		$item = "NEXT_PERIOD";
 		$date = date('l, F j, Y');
-		echo $valor = $date;
+		$valor = $date;
 
 		$Customers = controllerAnnuals::ctrSendReminder($item, $valor);
 		
-		print_r($Customers);
+		//print_r($Customers);
 		
 		foreach ($Customers as $key => $value) 
 		{
-			echo $value["STATUS_REMINDER"];
-				if($value["STATUS_REMINDER"] == '0')
-				{
-								 $body .= "<tr>";
+			
+				$body .= "<tr>";
 								 $body .= "<td>". $value["REGISTRATION_NUMBER"]."</td>";
 								 $body .= "<td>".$value["ENTERPRISE_NAME"]."</td>";
 								 $body .= "<td>".$value["NEXT_PERIOD"]."</td>";
-								 $body .= "<td>".$value["STATUS_REMINDER"]."</td>";
-								 $body .= "</tr>";		
-				}
+								 $body .= "<td>".$value["RETURNS_DUE"]."</td>";
+								 $body .= "</tr>";	
+
+		 		
+				
+				
 		} 
-	
-		$body .= "</table>";
+
+			//email start
+
+				$body .= "</table>";
 		
 			
-		echo  $body;
+		  echo  $body;
+
+
+				if($value["STATUS_REMINDER"] == '0')
+				{
+								 
 		//exit;
 		
 		$mail = new PHPMailer();
 
 		// SMTP configuration
 		$mail->isSMTP();
-		$mail->Host = 'mail.technocreative.co.za';
+		$mail->Host = 'mail.masombukaimports.co.za';
 		$mail->SMTPAuth = true;
-		$mail->Username = 'emmanuel@technocreative.co.za';
-		$mail->Password = 'Emmana3671';
+		$mail->Username = 'info@masombukaimports.co.za';
+		$mail->Password = 'q1w2e3r4t5';
 		$mail->SMTPSecure = '';
 		$mail->Port = 587;
 
-		$mail->setFrom('emmanuel@technocreative.co.za', 'CIPC Annual Reminder Automated System');
+		$mail->setFrom('emmanuel.molobela@gmail.com', 'CIPC Annual Reminder Automated System');
 
 		// Add a recipient
-		$to="emmanuel.molobela@gmail.com";
+		$to="info@masombukaimports.co.za";
 		$mail->addAddress($to);
 
 
@@ -354,8 +362,8 @@ class ControllerAnnuals{
 								);
 								   
 								 $answer = ModelAnnuals::mdlEditAnnuals($table, $data);
-								 print_r($answer);
-								 echo"upadted";
+								 //print_r($answer);
+								 echo"updated";
 				} 
 			
 		}else{
@@ -363,6 +371,13 @@ class ControllerAnnuals{
 			echo " not Successful";
 			
 		}
+
+								 //email end
+
+									
+				}
+	
+
 	}
 	
 

@@ -1,6 +1,7 @@
 <?php
-//require("../extensions/phpMailer/class.PHPMailer.php");
-//require_once "models/annualreturns.model.php";
+//error_reporting(E_ERROR);
+//require_once("extensions/phpMailer/class.PHPMailer.php");
+require_once "models/annualreturns.model.php";
 class ControllerAnnuals{
 
 	/*=============================================
@@ -11,7 +12,7 @@ class ControllerAnnuals{
 
 		if(isset($_POST["newName"])){
 
-			if(isset($_POST["newName"])
+			if(preg_match('/^[#\.\-a-zA-Z0-9 ]+$/', $_POST["newName"])
 			   ){
 
 			   	$table = "cipc_annual_returns";
@@ -38,13 +39,11 @@ class ControllerAnnuals{
 					           "fileddate"=>$_POST["newfileddate"],
 							   "armonths"=>$armonth->format('M'),
 								"nextdue"=>$date2->format($formatString),
-								"howmanyreturns"=> $Currentdate ->format('Y') - $date2->format('Y'),
+								"howmanyreturns"=> $Currentdate ->format('Y') - $date2->format('Y') + 1,
 								"statusreminder"=>$reminder,
 					           "regnumber"=>$_POST["newRegNumber"] );
-				
-				
+		
 			   	$answer = ModelAnnuals::mdlAddAnnuals($table, $data);
-				
 				
 			   	if($answer == "ok"){
 
@@ -114,7 +113,7 @@ class ControllerAnnuals{
 
 		if(isset($_POST["editname"])){
 
-			if(isset( $_POST["editname"]) 
+			if(preg_match('/^[a-zA-Z0-9ñÑáéíóúÁÉÍÓÚ ]+$/', $_POST["editname"]) 
 			   ){
 
 			   	$table = "cipc_annual_returns";
@@ -138,11 +137,11 @@ class ControllerAnnuals{
 					           "fileddate"=>$_POST["editfiledate"],
 							   "armonths"=>$armonth->format('M'),
 								"nextdue"=>$date2->format($formatString),
-								"howmanyreturns"=> $Currentdate ->format('Y') - $date2->format('Y'),
+								"howmanyreturns"=> $Currentdate ->format('Y') - $date2->format('Y') + 1,
 								"statusreminder"=>$reminder,
 					           "regnumber"=>$_POST["editregnumber"]
 					        );
-				
+				//print_r($data);
 
 
 			   	$answer = ModelAnnuals::mdlEditAnnuals($table, $data);
@@ -235,6 +234,8 @@ class ControllerAnnuals{
 		}
 
 	}
+	
+	
 	/*=============================================
 	SHOW Reminder Dates
 	=============================================*/
@@ -248,58 +249,133 @@ class ControllerAnnuals{
 		return $answer;
 
 	}
+	//End Function 
 	
 	public function ctrSendEmail(){
 		
 		$body = "";
-$body .= "<table class='future col col-lg-12'>";
+		$body .= "<table class='future col col-lg-12'>";
 
-$body .= "<tr>";
-$body .= "<td> <h2>Company Details</h2></td>";
-$body .= "</tr>";
+		$body .= "<tr>";
+		$body .= "<td> <h2>File Annual Returns</h2></td>";
+		$body .= "</tr>";
 
-$body .= "<tr>";
-$body .= "<td>Registration Number </td>";
-$body .= "<td>Company Name</td>";
-$body .= "<td>Returns Due</td>";
-$body .= "<td>Due Date</td>";
+		$body .= "<tr>";
+		$body .= "<td>Registration Number </td>";
+		$body .= "<td>Company Name</td>";
+		$body .= "<td>Date</td>";
+		$body .= "<td>Number of returns</td>";
 
-$body .= "</tr>";
+		$body .= "</tr>";
+		//COMPARE
+		$item = "NEXT_PERIOD";
+		$date = date('l, F j, Y');
+		$valor = $date;
 
-date_default_timezone_set('Africa/Johannesburg');
-$item = "NEXT_PERIOD";
-$date = date('l, F j, Y');
- $valor = $date;
+		$Customers = controllerAnnuals::ctrSendReminder($item, $valor);
+		
+		//print_r($Customers);
+		
+		foreach ($Customers as $key => $value) 
+		{
+			
+				$body .= "<tr>";
+								 $body .= "<td>". $value["REGISTRATION_NUMBER"]."</td>";
+								 $body .= "<td>".$value["ENTERPRISE_NAME"]."</td>";
+								 $body .= "<td>".$value["NEXT_PERIOD"]."</td>";
+								 $body .= "<td>".$value["RETURNS_DUE"]."</td>";
+								 $body .= "</tr>";	
+		} 
 
-$Customers = controllerAnnuals::ctrSendReminder($item, $valor);
-foreach ($Customers as $key => $value) 
-{
-	 
-						 $body .= "<tr>";
-						 $body .= "<td>". $value["REGISTRATION_NUMBER"]."</td>";
-						 $body .= "<td>".$value["ENTERPRISE_NAME"]."</td>";
-						 
-						 $body .= "<td>".$value["RETURNS_DUE"]."</td>";
-						 $body .= "<td>".$value["NEXT_PERIOD"]."</td>";
-						 $body .= "</tr>";		
-} 
+			//email start
 
-$body .= "</table>";
+				$body .= "</table>";
+			
+		  //echo  $body;
+
+		if($value["STATUS_REMINDER"] == '0')
+		{
+								 
+		//exit;
+		
+		$mail = new PHPMailer();
+
+		// SMTP configuration
+		$mail->isSMTP();
+		$mail->Host = 'mail.masombukaimports.co.za';
+		$mail->SMTPAuth = true;
+		$mail->Username = 'info@masombukaimports.co.za';
+		$mail->Password = 'q1w2e3r4t5';
+		$mail->SMTPSecure = '';
+		$mail->Port = 587;
+
+		$mail->setFrom('emmanuel.molobela@gmail.com', 'CIPC Annual Reminder Automated System');
+
+		// Add a recipient
+		$to="info@masombukaimports.co.za";
+		$mail->addAddress($to);
+
+
+		// Email subject
+		$sub="CIPC Annual Reminder Automated System";
+		$mail->Subject = $sub;
+
+		// Set email format to HTML
+		$mail->isHTML(true);
+
+		// Email body content
+		$mailContent = $body;
+		$mail->Body = $mailContent;
+
+		// Send email
+		if($mail->send()){
+			//return TRUE;
+			
+			
+		$table = "cipc_annual_returns";
+			
+			foreach ($Customers as $key => $value) 
+				{
+			 
+					$regnumber = $value["REGISTRATION_NUMBER"];
+					$name = $value["ENTERPRISE_NAME"];
+					$fileddate = $value["YEAR_FILED"];
+					$armonth = $value["AR_MONTH"];
+					$nextdue = $value["NEXT_PERIOD"];
+					$howmanyreturns = $value["RETURNS_DUE"];
+					$reminder = "1";
+								  
+					$data = array("id"=>$regnumber,
+								"name"=>$name,
+								"fileddate"=>$fileddate,
+								"armonths"=>$armonth,
+								"nextdue"=>$nextdue,
+								"howmanyreturns"=> $howmanyreturns,
+								"statusreminder"=>$reminder,
+								"regnumber"=>$regnumber);
+								   
+					$answer = ModelAnnuals::mdlEditAnnuals($table, $data);
+					
+					//echo"updated";
+				} 
+			
+		}else{
+			//return FALSE;
+			echo " not Successful";
+		}
+
+		//email end
+
+									
+		}
 	
-//echo  $body;
-
-$subject = "CIPC Annual Returns Reminder Automated System";
-$fromAddress = "info@simplefiling.co.za>";
-$to_address = "emmanuel@technocreative.co.za.com";
-	
-$headers = "From:Masombuka<info@simplefiling.co.za>"."\r\n"."Reply-To:info@simplefiling.co.za>"."\r\n". 'Content-type:text/html;charset = us-ascii'."\r\n"."X-Mailer: PHP/" . phpversion();
-//mail($to_address,$subject,$body,$headers)or die("Error connecting to mail server, please try again later");
 
 	}
+	//End Function
 	
-
 
 
 }
-//$sendReminder = new  ControllerAnnuals();
-//$sendReminder->ctrSendEmail();
+
+$sendReminder = new  ControllerAnnuals();
+$sendReminder->ctrSendEmail();

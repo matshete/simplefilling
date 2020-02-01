@@ -1,12 +1,15 @@
 <?php
-
-class ControllerempvatA{
+error_reporting(E_ERROR);
+//require_once("extensions/phpMailer/class.PHPMailer.php");
+include("models/vatA.model.php");
+include("../models/vatA.model.php");
+class ControllervatA{
 
 	/*=============================================
 	CREATE CUSTOMERS
 	=============================================*/
 
-	static public function ctrCreateempvatA(){
+	static public function ctrCreatevatA(){
 
 		if(isset($_POST["newName"])){
 
@@ -57,7 +60,7 @@ class ControllerempvatA{
 					           "regnumber"=>$_POST["newRegNumber"] );
 							 // print_r($data);exit;
 		
-			   	$answer = ModelempvatA::mdlAddempvatA($table, $data);
+			   	$answer = ModelempvatA::mdlAddvatA($table, $data);
 				//print_r($answer);
 				//exit();
 				
@@ -111,7 +114,7 @@ class ControllerempvatA{
 	SHOW CUSTOMERS
 	=============================================*/
 
-	static public function ctrShowempvatA($item, $value){
+	static public function ctrShowvatA($item, $value){
 
 		$table = "vata";
 
@@ -126,7 +129,7 @@ class ControllerempvatA{
 	EDIT CUSTOMER
 	=============================================*/
 
-	static public function ctrEditempvatA(){
+	static public function ctrEditvatA(){
 
 		if(isset($_POST["editname"])){
 
@@ -176,7 +179,7 @@ class ControllerempvatA{
 							 // print_r($data);exit;
 
 
-			   	$answer = ModelEmpvatA::mdlEditempvatA($table, $data);
+			   	$answer = ModelempvatA::mdlEditvatA($table, $data);
 				print_r($answer);
 				
 
@@ -232,7 +235,7 @@ class ControllerempvatA{
 	DELETE CUSTOMER
 	=============================================*/
 
-	static public function ctrDeleteempvatA(){
+	static public function ctrDeletevatA(){
 
 		if(isset($_GET["regNumber"])){
 
@@ -240,7 +243,7 @@ class ControllerempvatA{
 			$data = $_GET["regNumber"];
 		
 
-			$answer = ModelempvatA::mdlDeleteempvatA($table, $data);
+			$answer = ModelempvatA::mdlDeletevatA($table, $data);
 			
 		
 
@@ -269,6 +272,145 @@ class ControllerempvatA{
 		}
 
 	}
+	
+			/*=============================================
+	SHOW Reminder Dates
+	=============================================*/
+
+	static public function ctrSendReminder($item, $value){
+
+		$table = "vatA";
+
+		$answer = ModelempvatA::mdlSendReminder($table, $item, $value);
+
+		return $answer;
+
+	}
+	//End Function 
+	
+	public function ctrSendEmail(){
+		
+		$body = "";
+		$body .= "<table class='future col col-lg-12'>";
+
+		$body .= "<tr>";
+		$body .= "<td> <h2>File Annual Returns</h2></td>";
+		$body .= "</tr>";
+
+		$body .= "<tr>";
+		$body .= "<td>Registration Number </td>";
+		$body .= "<td>Company Name</td>";
+		$body .= "<td>Date</td>";
+		$body .= "<td>Number of returns</td>";
+
+		$body .= "</tr>";
+		//COMPARE
+		$item = "NEXT_PERIOD";
+		$date = date('l, F j, Y');
+		$valor = $date;
+
+		$Customers = controllervatA::ctrSendReminder($item, $valor);
+		
+		//print_r($Customers);
+		
+		foreach ($Customers as $key => $value) 
+		{
+			
+				$body .= "<tr>";
+								 $body .= "<td>". $value["REGISTRATION_NUMBER"]."</td>";
+								 $body .= "<td>".$value["ENTERPRISE_NAME"]."</td>";
+								 $body .= "<td>".$value["NEXT_PERIOD"]."</td>";
+								 $body .= "<td>".$value["RETURNS_DUE"]."</td>";
+								 $body .= "</tr>";	
+		} 
+
+			//email start
+
+				$body .= "</table>";
+			
+		  //echo  $body;
+
+		if($value["STATUS_REMINDER"] == '0')
+		{
+								 
+		//exit;
+		
+		$mail = new PHPMailer();
+
+		// SMTP configuration
+		$mail->isSMTP();
+		$mail->Host = 'mail.masombukaimports.co.za';
+		$mail->SMTPAuth = true;
+		$mail->Username = 'info@masombukaimports.co.za';
+		$mail->Password = 'q1w2e3r4t5';
+		$mail->SMTPSecure = '';
+		$mail->Port = 587;
+
+		$mail->setFrom('emmanuel.molobela@gmail.com', 'CIPC Annual Reminder Automated System');
+
+		// Add a recipient
+		$to="info@masombukaimports.co.za";
+		$mail->addAddress($to);
+
+
+		// Email subject
+		$sub="CIPC Annual Reminder Automated System";
+		$mail->Subject = $sub;
+
+		// Set email format to HTML
+		$mail->isHTML(true);
+
+		// Email body content
+		$mailContent = $body;
+		$mail->Body = $mailContent;
+
+		// Send email
+		if($mail->send()){
+			//return TRUE;
+			
+			
+		$table = "vatA";
+			
+			foreach ($Customers as $key => $value) 
+				{
+			 
+					$regnumber = $value["REGISTRATION_NUMBER"];
+					$name = $value["ENTERPRISE_NAME"];
+					$fileddate = $value["YEAR_FILED"];
+					//$armonth = $value["AR_MONTH"];
+					$nextdue = $value["NEXT_PERIOD"];
+					$howmanyreturns = $value["RETURNS_DUE"];
+					$reminder = "1";
+								  
+					$data = array("id"=>$regnumber,
+								"name"=>$name,
+								"fileddate"=>$fileddate,
+								//"armonths"=>$armonth,
+								"nextdue"=>$nextdue,
+								"howmanyreturns"=> $howmanyreturns,
+								"statusreminder"=>$reminder,
+								"regnumber"=>$regnumber);
+								   
+					$answer = ModelvatA::mdlEditvatA($table, $data);
+					
+					//echo"updated";
+				} 
+			
+		}else{
+			//return FALSE;
+			//echo " not Successful";
+		}
+
+		//email end
+
+									
+		}
+	
+
+	}
+	//End Function
 
 }
 
+$sendReminder = new  ControllervatA();
+$sendReminder->ctrSendEmail();
